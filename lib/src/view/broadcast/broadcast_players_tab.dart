@@ -233,9 +233,13 @@ class _BroadcastPlayersListState extends ConsumerState<BroadcastPlayersList> {
                     SizedBox(
                       width: scoreWidth,
                       child: _TableTitleCell(
-                        title: Text(
-                          withScores ? context.l10n.broadcastScore : context.l10n.games,
-                          style: _kHeaderTextStyle,
+                        title: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            withScores ? context.l10n.broadcastScore : context.l10n.games,
+                            style: _kHeaderTextStyle,
+                          ),
                         ),
                         onTap: () => toggleSort(_SortingTypes.score),
                         sortIcon: (currentSort == _SortingTypes.score) ? sortIcon : null,
