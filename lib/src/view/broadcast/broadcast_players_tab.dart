@@ -233,9 +233,22 @@ class _BroadcastPlayersListState extends ConsumerState<BroadcastPlayersList> {
                     SizedBox(
                       width: scoreWidth,
                       child: _TableTitleCell(
-                        title: Text(
-                          withScores ? context.l10n.broadcastScore : context.l10n.games,
-                          style: _kHeaderTextStyle,
+                        // FittedBox scales the header text down proportionally
+                        // to fit the fixed-width score column, preventing
+                        // truncation for long l10n translations (e.g. German
+                        // "Punkte"). The overflow: TextOverflow.ellipsis in
+                        // _kHeaderTextStyle is intentionally inert here —
+                        // FittedBox gives the Text unbounded width during
+                        // layout so the ellipsis is never triggered. Removing
+                        // FittedBox without addressing the overflow would
+                        // reintroduce the bug.
+                        title: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: AlignmentDirectional.centerStart,
+                          child: Text(
+                            withScores ? context.l10n.broadcastScore : context.l10n.games,
+                            style: _kHeaderTextStyle,
+                          ),
                         ),
                         onTap: () => toggleSort(_SortingTypes.score),
                         sortIcon: (currentSort == _SortingTypes.score) ? sortIcon : null,
