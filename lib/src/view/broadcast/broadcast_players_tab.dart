@@ -233,9 +233,13 @@ class _BroadcastPlayersListState extends ConsumerState<BroadcastPlayersList> {
                     SizedBox(
                       width: scoreWidth,
                       child: _TableTitleCell(
-                        title: Text(
-                          withScores ? context.l10n.broadcastScore : context.l10n.games,
-                          style: _kHeaderTextStyle,
+                        title: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            withScores ? context.l10n.broadcastScore : context.l10n.games,
+                            style: _kHeaderTextStyle.copyWith(overflow: TextOverflow.visible),
+                          ),
                         ),
                         onTap: () => toggleSort(_SortingTypes.score),
                         sortIcon: (currentSort == _SortingTypes.score) ? sortIcon : null,
@@ -400,67 +404,53 @@ class BroadcastPlayerRow extends StatelessWidget {
             : Image.asset('assets/images/anon-face.webp', width: 40, height: 40),
       ),
       title: Row(
-        mainAxisSize: .min,
         children: [
-          if (rank != null) ...[
+          if (rank != null)
             Text(
-              rank.toString(),
-              style: TextStyle(
-                color: textShade(context, Styles.subtitleOpacity),
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
-            ),
-            const SizedBox(width: 5),
-          ],
-          Expanded(
-            child: BroadcastPlayerWidget(player: player, showRating: false, showFederation: false),
-          ),
+              '#$rank',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            )
+          else
+            Text('$index.'),
+          const SizedBox(width: 8),
+          Expanded(child: BroadcastPlayerWidget(player: player, showRating: false)),
         ],
       ),
-      subtitle: federation != null
+      subtitle: rating != null
           ? Row(
-              mainAxisSize: .min,
               children: [
-                Image.asset('assets/images/fide-fed/$federation.png', height: 12),
-                const SizedBox(width: 5),
-                if (rating != null)
-                  Text(
-                    rating.toString(),
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontFeatures: [FontFeature.tabularFigures()],
-                    ),
+                Text(rating.toString()),
+                if (ratingDiff != null)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: ProgressionWidget(ratingDiff),
                   ),
-                const SizedBox(width: 4),
-                if (ratingDiff != null) ProgressionWidget(ratingDiff, fontSize: 13),
               ],
             )
           : null,
-      trailing: rating != null || score != null
-          ? SizedBox(
-              width: 35,
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: score != null
-                    ? Text(
-                        score.toStringAsFixed((score == score.roundToDouble()) ? 0 : 1),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          fontFeatures: [FontFeature.tabularFigures()],
-                        ),
-                      )
-                    : Text(
-                        played.toString(),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          fontFeatures: [FontFeature.tabularFigures()],
-                        ),
-                      ),
+      trailing: InkWell(
+        borderRadius: BorderRadius.circular(8.0),
+        onLongPress: hasTieBreaks ? () => _showTieBreaksBottomSheet(context) : null,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (hasTieBreaks)
+              Padding(
+                padding: const EdgeInsets.only(right: 4.0),
+                child: Icon(
+                  Icons.info_outline,
+                  size: 16,
+                  color: Theme.of(context).textTheme.bodySmall?.color,
+                ),
               ),
-            )
-          : null,
+            Text(
+              score != null
+                  ? NumberFormat('0.#').format(score)
+                  : '$played ${context.l10n.games.toLowerCase()}',
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
